@@ -1,6 +1,7 @@
 Flask
 Flask-Cors
 pandas
+pycopg2-binary
 scikit-learn
 sqlalchemy
 matplotlib
