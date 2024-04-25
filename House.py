@@ -1,7 +1,6 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 import pandas as pd
-from pandas import read_csv
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
@@ -23,14 +22,12 @@ table_name = "your_table_name"  # Replace with your table name
 # Create connection string
 connection_str = f"postgresql://{username}:{password}@{hostname}:{port}/{database}"
 
-# Load dataset
-dataset = read_csv("BostonHousing.csv")
-
 # Create SQLAlchemy engine
 engine = create_engine(connection_str)
 
-# Insert data into PostgreSQL table
-dataset.to_sql(table_name, engine, if_exists='replace', index=False)
+# Fetch data from PostgreSQL table
+query = f"SELECT * FROM {table_name}"
+dataset = pd.read_sql(query, engine)
 
 # Data analysis and modeling
 X = dataset.iloc[:, :-1]
@@ -60,7 +57,7 @@ r2_linear = r2_score(y_test, reg_pred)
 mse_rf = mean_squared_error(y_test, y_pred_rf)
 r2_rf = r2_score(y_test, y_pred_rf)
 
-# Plotting
+# Plotting (assuming you still want to plot)
 import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 6))
