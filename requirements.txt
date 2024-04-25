@@ -4,4 +4,4 @@ pandas
 scikit-learn
 sqlalchemy
 matplotlib
-gunicon
+gunicorn
