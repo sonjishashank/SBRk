@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, send_file
 from flask_cors import CORS
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -7,6 +7,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_squared_error, r2_score
 from sqlalchemy import create_engine
+import matplotlib.pyplot as plt
+import io
+import base64
 
 app = Flask(__name__)
 CORS(app)
@@ -57,9 +60,7 @@ r2_linear = r2_score(y_test, reg_pred)
 mse_rf = mean_squared_error(y_test, y_pred_rf)
 r2_rf = r2_score(y_test, y_pred_rf)
 
-# Plotting (assuming you still want to plot)
-import matplotlib.pyplot as plt
-
+# Plotting
 plt.figure(figsize=(10, 6))
 plt.scatter(y_test, reg_pred, label='Linear Regression', color='r', alpha=0.5)
 plt.scatter(y_test, y_pred_rf, label='Random Forest Regression', color='g', alpha=0.5)
@@ -68,6 +69,21 @@ plt.ylabel("Predicted price")
 plt.legend()
 plt.title("Model Comparison: Linear vs. Random Forest Regression")
 plt.grid(True)
+
+# Save the plot to a BytesIO object
+img_buffer = io.BytesIO()
+plt.savefig(img_buffer, format='png')
+img_buffer.seek(0)
+plt.close()
+
+@app.route('/plot')
+def get_plot():
+    # Encode the plot image buffer to base64
+    img_base64 = base64.b64encode(img_buffer.getvalue()).decode()
+
+    return jsonify({
+        "plot_image_base64": img_base64
+    })
 
 @app.route('/predictions')
 def get_predictions():
@@ -81,7 +97,8 @@ def get_predictions():
         "Random Forest Regression Metrics": {
             "MSE": mse_rf,
             "R²": r2_rf
-        }
+        },
+        "Plot URL": "/plot"  # URL to retrieve the plot image
     })
 
 if __name__ == "__main__":
